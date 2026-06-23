@@ -165,6 +165,11 @@ const userSchema = new mongoose.Schema(
         ref: "Tag",
       },
     ],
+    company_id: {
+      type: String,
+      default: null,
+      trim: true,
+    },
   },
   {
     timestamps: true,

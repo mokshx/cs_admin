@@ -1,4 +1,15 @@
 {
-"saurabh":"saurabh16531",
-"moksh":"moksh615"
+  "moksh": {
+    "password": "moksh615",
+    "type": "admin"
+  },
+  "saurabh": {
+    "password": "saurabh16531",
+    "type": "admin"
+  },
+  "cmp123": {
+    "password": "psswd1234",
+    "type": "companyAdmin",
+    "company_id": "testcmp123"
+  }
 }

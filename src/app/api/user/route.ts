@@ -19,5 +19,5 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({ user: { username: decoded.username } });
+  return NextResponse.json({ user: { username: decoded.username, type: decoded.type, company_id: decoded.company_id ?? null } });
 }

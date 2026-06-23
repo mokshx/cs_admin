@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [selectedUser, setSelectedUser] = useState<DatabaseUser | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [currentUserType, setCurrentUserType] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -52,7 +53,13 @@ export default function Dashboard() {
           window.location.href = "/login";
           return;
         }
-        setLoading(false);
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          setCurrentUserType(data.user?.type ?? null);
+          setLoading(false);
+        }
       })
       .catch(() => {
         window.location.href = "/login";
@@ -332,6 +339,11 @@ export default function Dashboard() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       ID
                     </th>
+                    {currentUserType === "admin" && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Company ID
+                      </th>
+                    )}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Remarks
                     </th>
@@ -416,6 +428,11 @@ export default function Dashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
                         {user._id.slice(-8)}...
                       </td>
+                      {currentUserType === "admin" && (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                          {user.company_id || "-"}
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {user.remarks || "-"}
                       </td>

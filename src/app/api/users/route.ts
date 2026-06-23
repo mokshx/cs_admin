@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
   try {
     // Verify authentication
     const token = request.cookies.get("auth-token")?.value;
-    if (!token || !verifyToken(token)) {
+    const decoded = token ? verifyToken(token) : null;
+    if (!decoded) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,9 +24,16 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
+    // companyAdmin users only see leads belonging to their company
+    const companyFilter =
+      decoded.type === "companyAdmin" && decoded.company_id
+        ? { company_id: decoded.company_id }
+        : {};
+
     // Build search query
     const searchQuery = search
       ? {
+          ...companyFilter,
           $or: [
             { name: { $regex: search, $options: "i" } },
             { email: { $regex: search, $options: "i" } },
@@ -34,7 +42,7 @@ export async function GET(request: NextRequest) {
             { officeEmail: { $regex: search, $options: "i" } },
           ],
         }
-      : {};
+      : companyFilter;
 
     const [users, total] = await Promise.all([
       User.find(searchQuery)
@@ -69,13 +77,19 @@ export async function POST(request: NextRequest) {
   try {
     // Verify authentication
     const token = request.cookies.get("auth-token")?.value;
-    if (!token || !verifyToken(token)) {
+    const decoded = token ? verifyToken(token) : null;
+    if (!decoded) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     await dbConnect();
 
     const userData = await request.json();
+
+    // Automatically stamp company_id for companyAdmin users
+    if (decoded.type === "companyAdmin" && decoded.company_id) {
+      userData.company_id = decoded.company_id;
+    }
 
     // Hash password if provided
     if (userData.password) {

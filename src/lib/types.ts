@@ -1,6 +1,8 @@
 // src/lib/types.ts
 export interface User {
   username: string;
+  type?: string;
+  company_id?: string | null;
 }
 
 export interface LoginRequest {
@@ -66,6 +68,7 @@ export interface InternshipAssignment {
 
 export interface DatabaseUser {
   _id: string;
+  company_id?: string | null;
   name?: string;
   email?: string;
   companyEmail?: string;

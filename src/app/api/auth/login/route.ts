@@ -16,12 +16,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user exists and password matches
-    const userRecord = users as Record<string, string>;
-    if (userRecord[username] && userRecord[username] === password) {
-      const token = signToken({ username });
+    const userRecord = users as Record<string, { password: string; type: string; company_id?: string | null }>;
+    if (userRecord[username] && userRecord[username].password === password) {
+      const { type, company_id } = userRecord[username];
+      const token = signToken({ username, type, company_id: company_id ?? null });
       const response = NextResponse.json({
         message: 'Login successful',
-        user: { username }
+        user: { username, type, company_id: company_id ?? null }
       });
       
       setAuthCookie(response.headers, token);
