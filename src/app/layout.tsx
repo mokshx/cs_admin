@@ -37,9 +37,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const navigation = [
     {
-      name: "User Management",
+      name: "Dashboard",
       href: "/dashboard",
       current: pathname === "/dashboard",
+    },
+    {
+      name: "Users Table",
+      href: "/users-table",
+      current: pathname === "/users-table",
     },
     {
       name: "Companies",

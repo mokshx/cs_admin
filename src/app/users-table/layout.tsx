@@ -1,15 +1,15 @@
-// src/app/dashboard/layout.tsx
+// src/app/users-table/layout.tsx
 import { cookies } from "next/headers";
 import { verifyToken } from "../../lib/auth";
 import { redirect } from "next/navigation";
 
-interface DashboardLayoutProps {
+interface UsersTableLayoutProps {
   children: React.ReactNode;
 }
 
-export default async function DashboardLayout({
+export default async function UsersTableLayout({
   children,
-}: DashboardLayoutProps) {
+}: UsersTableLayoutProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get("auth-token")?.value;
 
@@ -19,6 +19,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* <Navbar user={user} /> */}
       <main>{children}</main>
     </div>
   );
