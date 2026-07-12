@@ -2,7 +2,29 @@
   "permissions": {
     "allow": [
       "Bash(node scripts/validate_palette.js \"#898781,#fab219,#0ca30c,#d03b3b\" --mode light)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Read(//private/tmp/**)",
+      "Bash(break)",
+      "Bash(curl -s -c cmp_cookies.txt -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"username\":\"cmp123\",\"password\":\"psswd1234\"}')",
+      "Bash(curl -s -b cmp_cookies.txt http://localhost:3000/api/users/stats)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -c admin_cookies.txt -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"username\":\"moksh\",\"password\":\"moksh615\"}')",
+      "Bash(curl -s -b admin_cookies.txt http://localhost:3000/api/users/stats)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('total:', d['totals']['total']\\); print\\('byCompany:', d['byCompany']\\)\")",
+      "Bash(cd /private/tmp/claude-501/-Users-mokshchadha-work-cs-admin/3b81f3c6-2302-413c-827a-6b3a9120e05f/scratchpad *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('total:', d['totals']['total']\\); print\\('byCompany:', d['byCompany']\\); print\\('isAdmin:', d['isAdmin']\\)\")",
+      "Bash(curl -s -b admin_cookies.txt -X DELETE http://localhost:3000/api/users/__TRACKED_VAR__)",
+      "Bash(pkill -f \"next dev --turbopack\")",
+      "Bash(npm run *)",
+      "Bash(npx eslint *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(chromium-cli --help)",
+      "Bash(npx -y -p playwright node verify.js)",
+      "Bash(npm init *)",
+      "Bash(npx playwright *)",
+      "Bash(node verify.js)",
+      "Bash(rm -f /private/tmp/claude-501/-Users-mokshchadha-work-cs-admin/3b81f3c6-2302-413c-827a-6b3a9120e05f/scratchpad/*.png)"
     ]
   }
 }

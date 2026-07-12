@@ -110,6 +110,9 @@ export async function GET(request: NextRequest) {
             },
             { $project: { _id: 0, status: "$_id", count: 1 } },
           ],
+          // Note: a facet branch of `[]` is an identity pass-through in
+          // MongoDB (returns raw matched docs unchanged), not an empty
+          // result — so non-admins must get an explicit no-op stage instead.
           byCompany: isAdmin
             ? [
                 {
@@ -122,7 +125,7 @@ export async function GET(request: NextRequest) {
                 { $limit: 10 },
                 { $project: { _id: 0, company_id: "$_id", count: 1 } },
               ]
-            : [],
+            : [{ $match: { _id: { $exists: false } } }],
         },
       },
     ]);

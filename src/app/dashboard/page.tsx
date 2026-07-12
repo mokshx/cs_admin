@@ -7,22 +7,30 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  BarController,
   LineElement,
+  LineController,
   PointElement,
+  ArcElement,
+  PieController,
   Title,
   Tooltip,
   Legend,
   Filler,
   TooltipItem,
 } from "chart.js";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar, Line, Pie } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  BarController,
   LineElement,
+  LineController,
   PointElement,
+  ArcElement,
+  PieController,
   Title,
   Tooltip,
   Legend,
@@ -50,6 +58,19 @@ const STATUS_LABELS: Record<string, string> = {
   completed: "Completed",
   cancelled: "Cancelled",
 };
+
+// Fixed-order categorical palette (see dataviz skill) — used for the tags
+// pie, the one chart here where each slice is its own distinct identity.
+const CATEGORICAL_COLORS = [
+  "#2a78d6",
+  "#1baf7a",
+  "#eda100",
+  "#008300",
+  "#4a3aa7",
+  "#e34948",
+  "#e87ba4",
+  "#eb6834",
+];
 
 interface CountItem {
   name: string;
@@ -100,11 +121,13 @@ function ChartCard({
   subtitle,
   children,
   legend,
+  heightClassName = "h-72",
 }: {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
   legend?: React.ReactNode;
+  heightClassName?: string;
 }) {
   return (
     <div className="bg-white shadow sm:rounded-md p-5">
@@ -115,7 +138,7 @@ function ChartCard({
         </div>
         {legend}
       </div>
-      <div className="h-72">{children}</div>
+      <div className={heightClassName}>{children}</div>
     </div>
   );
 }
@@ -163,6 +186,36 @@ const horizontalBarOptions = {
     y: {
       ticks: { color: LABEL_INK },
       grid: { display: false },
+    },
+  },
+};
+
+function pieData(items: CountItem[]) {
+  return {
+    labels: items.map((i) => i.name),
+    datasets: [
+      {
+        data: items.map((i) => i.count),
+        backgroundColor: items.map((_, i) => CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length]),
+        borderColor: "#ffffff",
+        borderWidth: 2,
+      },
+    ],
+  };
+}
+
+const pieOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom" as const,
+      labels: { color: LABEL_INK, boxWidth: 10, font: { size: 11 }, padding: 8 },
+    },
+    tooltip: {
+      callbacks: {
+        label: (ctx: TooltipItem<"pie">) => ` ${ctx.label}: ${(ctx.parsed ?? 0).toLocaleString()}`,
+      },
     },
   },
 };
@@ -343,9 +396,9 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="Top tags" subtitle="Most-used lead tags">
+        <ChartCard title="Top tags" subtitle="Most-used lead tags" heightClassName="h-96">
           {stats.topTags.length ? (
-            <Bar data={horizontalBarData(stats.topTags)} options={horizontalBarOptions} />
+            <Pie data={pieData(stats.topTags)} options={pieOptions} />
           ) : (
             <EmptyState label="No tags assigned yet" />
           )}
