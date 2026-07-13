@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useCompanyFilter } from "../../lib/companyFilter";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -88,21 +89,37 @@ interface StatsResponse {
   byCompany: { company_id: string; count: number }[];
 }
 
+const TILE_ICON_STYLES: Record<string, string> = {
+  indigo: "bg-indigo-100 text-indigo-600",
+  green: "bg-green-100 text-green-600",
+  amber: "bg-amber-100 text-amber-600",
+  blue: "bg-blue-100 text-blue-600",
+};
+
 function StatTile({
   label,
   value,
   sublabel,
   meterPercent,
+  icon,
+  iconTone = "blue",
 }: {
   label: string;
   value: string;
   sublabel?: string;
   meterPercent?: number;
+  icon: React.ReactNode;
+  iconTone?: keyof typeof TILE_ICON_STYLES;
 }) {
   return (
-    <div className="bg-white shadow sm:rounded-md p-5">
+    <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-5">
+      <span
+        className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${TILE_ICON_STYLES[iconTone]}`}
+      >
+        {icon}
+      </span>
       <p className="text-sm font-medium text-gray-500">{label}</p>
-      <p className="mt-1 text-3xl font-semibold text-gray-900">{value}</p>
+      <p className="mt-1 text-2xl font-semibold text-gray-900">{value}</p>
       {sublabel && <p className="mt-1 text-xs text-gray-500">{sublabel}</p>}
       {meterPercent !== undefined && (
         <div className="mt-3 h-2 w-full rounded-full bg-blue-100">
@@ -130,7 +147,7 @@ function ChartCard({
   heightClassName?: string;
 }) {
   return (
-    <div className="bg-white shadow sm:rounded-md p-5">
+    <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-5">
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-base font-semibold text-gray-900">{title}</h3>
@@ -142,6 +159,31 @@ function ChartCard({
     </div>
   );
 }
+
+function TileIcon({ path }: { path: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.75}
+      stroke="currentColor"
+      className="w-5 h-5"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d={path} />
+    </svg>
+  );
+}
+
+const ICON_PATHS = {
+  users:
+    "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.649M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
+  badgeCheck:
+    "M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
+  briefcase:
+    "M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.653v-1.4c0-1.056-.75-1.988-1.803-2.15a45.4 45.4 0 0 0-1.194-.164M18.75 14.15v-1.4a2.18 2.18 0 0 0-.75-1.653m0 3.053a45.4 45.4 0 0 1-15.05 0m15.05 0a2.18 2.18 0 0 1-.75 1.653m-14.3-1.653a2.18 2.18 0 0 1-.75-1.653v-1.4c0-1.056.75-1.988 1.803-2.15a45.4 45.4 0 0 1 1.194-.164M4.5 14.15v-1.4c0-1.056.75-1.988 1.803-2.15M15 6.75a3 3 0 1 0-6 0m6 0v.75a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1-.75-.75v-.75m6 0h-6",
+  cap: "M4.26 10.147a60.44 60.44 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443",
+};
 
 function EmptyState({ label }: { label: string }) {
   return (
@@ -224,6 +266,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [stats, setStats] = useState<StatsResponse | null>(null);
+  const { selectedCompanyId, companies } = useCompanyFilter();
 
   useEffect(() => {
     fetch("/api/user")
@@ -247,12 +290,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (loading) return;
     setStatsLoading(true);
-    fetch("/api/users/stats")
+    const url = selectedCompanyId
+      ? `/api/users/stats?company_id=${selectedCompanyId}`
+      : "/api/users/stats";
+    fetch(url)
       .then((res) => res.json())
       .then((data: StatsResponse) => setStats(data))
       .catch((error) => console.error("Error fetching stats:", error))
       .finally(() => setStatsLoading(false));
-  }, [loading]);
+  }, [loading, selectedCompanyId]);
 
   const signupDelta = useMemo(() => {
     if (!stats || stats.signupsByMonth.length < 2) return null;
@@ -336,18 +382,23 @@ export default function Dashboard() {
     ],
   };
 
+  const companyNameById = new Map(companies.map((c) => [c._id, c.name]));
   const byCompanyItems: CountItem[] = stats.byCompany.map((c) => ({
-    name: c.company_id,
+    name: companyNameById.get(c.company_id) ?? c.company_id,
     count: c.count,
   }));
+  const selectedCompanyName = selectedCompanyId
+    ? companyNameById.get(selectedCompanyId) ?? null
+    : null;
 
   return (
     <div className="max-w-full mx-auto py-6 px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-gray-600">
-          Lead growth, verification, and internship pipeline at a glance
+        <p className="text-gray-600">
+          {selectedCompanyName
+            ? `Lead growth, verification, and internship pipeline for ${selectedCompanyName}`
+            : "Lead growth, verification, and internship pipeline at a glance"}
         </p>
       </div>
 
@@ -356,6 +407,8 @@ export default function Dashboard() {
         <StatTile
           label="Total leads"
           value={totals.total.toLocaleString()}
+          icon={<TileIcon path={ICON_PATHS.users} />}
+          iconTone="indigo"
           sublabel={
             signupDelta === null
               ? undefined
@@ -369,41 +422,45 @@ export default function Dashboard() {
         <StatTile
           label="Verified rate"
           value={`${verifiedPct}%`}
+          icon={<TileIcon path={ICON_PATHS.badgeCheck} />}
+          iconTone="green"
           sublabel={`${totals.verified.toLocaleString()} of ${totals.total.toLocaleString()} verified`}
           meterPercent={verifiedPct}
         />
         <StatTile
           label="Recruiter share"
           value={`${recruiterPct}%`}
+          icon={<TileIcon path={ICON_PATHS.briefcase} />}
+          iconTone="amber"
           sublabel={`${totals.recruiters.toLocaleString()} of ${totals.total.toLocaleString()} are recruiters`}
           meterPercent={recruiterPct}
         />
         <StatTile
           label="Placements completed"
           value={placementsCompleted.toLocaleString()}
+          icon={<TileIcon path={ICON_PATHS.cap} />}
+          iconTone="blue"
           sublabel={`of ${totalAssignments.toLocaleString()} total internship assignments`}
         />
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-6 mb-6">
-        <ChartCard
-          title="New sign-ups"
-          subtitle="Last 6 months"
-        >
-          <Line data={lineData} options={lineOptions} />
-        </ChartCard>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="Top tags" subtitle="Most-used lead tags" heightClassName="h-96">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <ChartCard title="New sign-ups" subtitle="Last 6 months">
+            <Line data={lineData} options={lineOptions} />
+          </ChartCard>
+        </div>
+        <ChartCard title="Top tags" subtitle="Most-used lead tags">
           {stats.topTags.length ? (
             <Pie data={pieData(stats.topTags)} options={pieOptions} />
           ) : (
             <EmptyState label="No tags assigned yet" />
           )}
         </ChartCard>
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard
           title="Internship pipeline"
           subtitle="Assignments by status"
@@ -447,7 +504,7 @@ export default function Dashboard() {
           )}
         </ChartCard>
 
-        {stats.isAdmin && byCompanyItems.length > 0 && (
+        {stats.isAdmin && !selectedCompanyId && byCompanyItems.length > 0 && (
           <ChartCard
             title="Leads by company"
             subtitle="Across all company-admin tenants"

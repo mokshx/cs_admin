@@ -38,10 +38,14 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const isAdmin = decoded.type === "admin";
-    // companyAdmin users only see stats for leads belonging to their own company
+    const selectedCompanyId = new URL(request.url).searchParams.get("company_id");
+    // companyAdmin users only see stats for leads belonging to their own
+    // company; an admin may optionally scope down via the org switcher.
     const companyFilter =
       decoded.type === "companyAdmin" && decoded.company_id
         ? { company_id: decoded.company_id }
+        : isAdmin && selectedCompanyId
+        ? { company_id: selectedCompanyId }
         : {};
 
     const months = lastNMonths(6);

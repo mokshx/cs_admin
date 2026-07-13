@@ -24,7 +24,12 @@
       "Bash(npm init *)",
       "Bash(npx playwright *)",
       "Bash(node verify.js)",
-      "Bash(rm -f /private/tmp/claude-501/-Users-mokshchadha-work-cs-admin/3b81f3c6-2302-413c-827a-6b3a9120e05f/scratchpad/*.png)"
+      "Bash(rm -f /private/tmp/claude-501/-Users-mokshchadha-work-cs-admin/3b81f3c6-2302-413c-827a-6b3a9120e05f/scratchpad/*.png)",
+      "Bash(curl -s -c /tmp/cs_admin_cookies.txt -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"username\":\"moksh\",\"password\":\"moksh615\"}')",
+      "Bash(rm -f /tmp/cs_admin_cookies.txt /tmp/cs_admin_cmp_cookies.txt /tmp/cs_admin_dev.log)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp"
     ]
   }
 }

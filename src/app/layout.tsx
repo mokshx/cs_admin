@@ -1,28 +1,27 @@
-// src/components/Layout.tsx
+// src/app/layout.tsx
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
-// import { User } from "../lib/types";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import "./globals.css";
+import Sidebar from "../components/Sidebar";
+import TopBar from "../components/TopBar";
+import { CompanyFilterProvider } from "../lib/companyFilter";
+import { User } from "../lib/types";
 
-// interface LayoutProps {
-//   children: React.ReactNode;
-//   user?: User;
-// }
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Fetch user if not provided (e.g. on client side navigation)
-  if (typeof window !== 'undefined') {
-    // We can try to rely on specific page logic or just fetch simple profile
-    // But for now, let's just use what we have or try to fetch
-    // Actually, let's try to fetch if we don't have it
-    // But useEffect is better
-  }
+  useEffect(() => {
+    if (pathname === "/login") return;
+    fetch("/api/user")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, [pathname]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -35,76 +34,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setIsLoggingOut(false);
   };
 
-  const navigation = [
-    {
-      name: "Dashboard",
-      href: "/dashboard",
-      current: pathname === "/dashboard",
-    },
-    {
-      name: "Users Table",
-      href: "/users-table",
-      current: pathname === "/users-table",
-    },
-    {
-      name: "Companies",
-      href: "/companies",
-      current: pathname === "/companies",
-    },
-    {
-      name: "Tags",
-      href: "/tags",
-      current: pathname === "/tags",
-    },
-  ];
+  const showChrome = pathname !== "/login" && !!user;
 
   return (
     <html lang="en">
       <body className="antialiased">
-        {" "}
-        <div className="min-h-screen bg-gray-50">
-          {true && (
-            <header className="bg-white shadow-sm border-b">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                  <div className="flex items-center space-x-8">
-                    <h1 className="text-xl font-semibold text-gray-900">
-                      Admin Panel
-                    </h1>
-
-                    {/* Navigation */}
-                    <nav className="flex space-x-4">
-                      {navigation.map((item) => (
-                        <button
-                          key={item.name}
-                          onClick={() => router.push(item.href)}
-                          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${item.current
-                              ? "bg-blue-100 text-blue-700"
-                              : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                            }`}
-                        >
-                          {item.name}
-                        </button>
-                      ))}
-                    </nav>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    Welcome!
-                    <button
-                      onClick={handleLogout}
-                      disabled={isLoggingOut}
-                      className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                    >
-                      {isLoggingOut ? "Logging out..." : "Logout"}
-                    </button>
-                  </div>
-                </div>
+        {showChrome ? (
+          <CompanyFilterProvider enabled={user?.type === "admin"}>
+            <div className="min-h-screen bg-gray-50 flex">
+              <Sidebar pathname={pathname} />
+              <div className="flex-1 flex flex-col min-w-0">
+                <TopBar user={user} isLoggingOut={isLoggingOut} onLogout={handleLogout} />
+                <main className="flex-1">{children}</main>
               </div>
-            </header>
-          )}
-          <main>{children}</main>
-        </div>
+            </div>
+          </CompanyFilterProvider>
+        ) : (
+          <div className="min-h-screen bg-gray-50">{children}</div>
+        )}
       </body>
     </html>
   );
