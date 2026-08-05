@@ -2,8 +2,16 @@
 "use client";
 
 import Link from "next/link";
+import { User } from "../lib/types";
 
-const NAV_ITEMS = [
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+  adminOnly?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -48,9 +56,30 @@ const NAV_ITEMS = [
       />
     ),
   },
+  {
+    name: "Leads",
+    href: "/leads",
+    adminOnly: true,
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
+      />
+    ),
+  },
 ];
 
-export default function Sidebar({ pathname }: { pathname: string }) {
+export default function Sidebar({
+  pathname,
+  user,
+}: {
+  pathname: string;
+  user?: User | null;
+}) {
+  const isAdmin = user?.type === "admin";
+  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
+
   return (
     <aside className="w-60 shrink-0 bg-white border-r border-gray-100 flex flex-col">
       <div className="h-16 flex items-center gap-2 px-5 border-b border-gray-100">
@@ -61,7 +90,7 @@ export default function Sidebar({ pathname }: { pathname: string }) {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const current = pathname === item.href;
           return (
             <Link

@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {showChrome ? (
           <CompanyFilterProvider enabled={user?.type === "admin"}>
             <div className="min-h-screen bg-gray-50 flex">
-              <Sidebar pathname={pathname} />
+              <Sidebar pathname={pathname} user={user} />
               <div className="flex-1 flex flex-col min-w-0">
                 <TopBar user={user} isLoggingOut={isLoggingOut} onLogout={handleLogout} />
                 <main className="flex-1">{children}</main>

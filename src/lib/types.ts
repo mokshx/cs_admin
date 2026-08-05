@@ -116,3 +116,16 @@ export interface Tag {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Lead {
+  _id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  organizationName?: string;
+  designation?: string;
+  interestedIn?: string;
+  agreeToNewsletter: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
